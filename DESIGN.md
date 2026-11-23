@@ -4,7 +4,13 @@
 - `Models/` – інтерфейс `IGradable`, абстрактний клас `CourseActivity`, спадкоємці `LabWork`, `Assignment`, `Quiz` з поліморфним методом `CalculateScore()`, статичний клас `ActivityFactory` (створення роботи потрібного типу для CRUD робіт), класи `Course`, `Student`, `GradeRecord`, `Enrollment`, `StorageData`, `BenchmarkResult`.
 - `Services/` – `CourseService` (CRUD курсів, здобувачів і робіт курсу, валідація, перевірка повторного запису, розрахунок рейтингу `T1`/`Tn` із `lock` та `CancellationToken`), `DataGenerator`.
 - `Repositories/` – `JsonStorage` (атомарне збереження та прив'язка посилань `ValidateAndLink()`), `XmlReportExporter`.
-- `ViewModels/` – `MainWindowViewModel` (команди `CommunityToolkit.Mvvm`, пошук, фільтрація, сортування, фонові операції).
+- `ViewModels/` – `MainWindowViewModel` (команди `CommunityToolkit.Mvvm`, пошук, фільтрація, сортування, фонові операції). Клас `partial`, розбитий на файли за блоками вікна:
+  - `MainWindowViewModel.cs` – стан, фільтри, оновлення таблиці, стартове завантаження;
+  - `MainWindowViewModel.Courses.cs` – «Керування курсами»;
+  - `MainWindowViewModel.Activities.cs` – «Роботи курсу» (CRUD робіт);
+  - `MainWindowViewModel.Students.cs` – «Керування здобувачами»;
+  - `MainWindowViewModel.Enrollments.cs` – «Запис на курс і оцінки»;
+  - `MainWindowViewModel.Data.cs` – імпорт/експорт JSON, генерація наборів, T1/Tn і XML.
 - `Views/` – `MainWindow.axaml` (інтерфейс із `DataGrid`, формою CRUD та `ProgressBar`), `ConfirmDialog` (вікно підтвердження «Так / Скасувати», передається у ViewModel через властивість `Confirm`).
 
 ## 2. UML-діаграма класів (Mermaid)
