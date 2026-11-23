@@ -1,0 +1,44 @@
+{
+  "Courses": [
+    {
+      "Code": "OOP-301",
+      "Title": "ООП",
+      "Instructor": "Стогул В. М.",
+      "Activities": []
+    }
+  ],
+  "Students": [
+    {
+      "FullName": "Іванаш Дмитро",
+      "Group": "3РП-11"
+    }
+  ],
+  "Enrollments": [
+    {
+      "Student": {
+        "FullName": "Іванаш Дмитро",
+        "Group": "3РП-11"
+      },
+      "Course": {
+        "Code": "OOP-301",
+        "Title": "ООП",
+        "Instructor": "Стогул В. М.",
+        "Activities": []
+      },
+      "Grades": []
+    },
+    {
+      "Student": {
+        "FullName": "Іванаш Дмитро",
+        "Group": "3РП-11"
+      },
+      "Course": {
+        "Code": "OOP-301",
+        "Title": "ООП",
+        "Instructor": "Стогул В. М.",
+        "Activities": []
+      },
+      "Grades": []
+    }
+  ]
+}

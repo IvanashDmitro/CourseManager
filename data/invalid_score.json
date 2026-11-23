@@ -1,0 +1,43 @@
+{
+  "Courses": [
+    {
+      "Code": "OOP-301",
+      "Title": "ООП",
+      "Instructor": "Стогул В. М.",
+      "Activities": []
+    }
+  ],
+  "Students": [
+    {
+      "FullName": "Іванаш Дмитро",
+      "Group": "3РП-11"
+    }
+  ],
+  "Enrollments": [
+    {
+      "Student": {
+        "FullName": "Іванаш Дмитро",
+        "Group": "3РП-11"
+      },
+      "Course": {
+        "Code": "OOP-301",
+        "Title": "ООП",
+        "Instructor": "Стогул В. М.",
+        "Activities": []
+      },
+      "Grades": [
+        {
+          "Activity": {
+            "activityType": "LabWork",
+            "Title": "Лабораторна 1",
+            "MaxScore": 20,
+            "Deadline": "2026-11-20",
+            "DefenseBonus": 2
+          },
+          "RawScore": 150,
+          "IsLate": false
+        }
+      ]
+    }
+  ]
+}
