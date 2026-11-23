@@ -1,0 +1,164 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CourseManager.ViewModels"
+        xmlns:m="using:CourseManager.Models"
+        x:Class="CourseManager.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Система управління навчальними курсами"
+        Width="1360" Height="780"
+        MinWidth="1280" MinHeight="620">
+
+    <!-- ШІ: Claude Code (Claude Opus 5.5) – доопрацювання розмітки: колонки «Наступна робота» / «Дедлайн» / «Рейтинг» / «Оцінка»,
+         підказки й шаблони списків, кнопка «Стартовий набір», лічильник рядків, ширина колонок і панелі.
+         Змінено: [ЗАПОВНИТИ – що змінив або перевірив студент] -->
+    <Grid RowDefinitions="Auto,*,Auto" Margin="12">
+        <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBox Width="210" Margin="0,0,8,4"
+                     PlaceholderText="Пошук за ПІБ або курсом..."
+                     Text="{Binding SearchQuery}" />
+            <ComboBox Width="115" Margin="0,0,8,4"
+                      ItemsSource="{Binding GroupFilters}"
+                      SelectedItem="{Binding SelectedGroupFilter}" />
+            <ComboBox Width="135" Margin="0,0,8,4"
+                      ToolTip.Tip="Фільтр за типом наступної невиконаної роботи"
+                      ItemsSource="{Binding ActivityFilters}"
+                      SelectedItem="{Binding SelectedActivityFilter}" />
+            <ComboBox Width="185" Margin="0,0,8,4"
+                      ItemsSource="{Binding SortModes}"
+                      SelectedItem="{Binding SelectedSortMode}" />
+            <TextBox Width="165" Margin="0,0,6,4"
+                     PlaceholderText="Шлях до JSON..."
+                     ToolTip.Tip="Файл для імпорту та експорту, наприклад backup.json або data\broken_syntax.json"
+                     Text="{Binding JsonFilePath}" />
+            <Button Content="Імпорт JSON" Margin="0,0,6,4" Command="{Binding ImportJsonCommand}" />
+            <Button Content="Експорт JSON" Margin="0,0,6,4" Command="{Binding ExportJsonCommand}" />
+            <Button Content="15 000 оцінок" Margin="0,0,6,4" Command="{Binding GenerateLargeDatasetCommand}"
+                    ToolTip.Tip="Великий набір для замірів T1/Tn" />
+            <Button Content="Стартовий набір" Margin="0,0,6,4" Command="{Binding ResetStartDataCommand}"
+                    ToolTip.Tip="Повернути 100 здобувачів зі стартовими даними" />
+            <Button Content="Рейтинг T1/Tn + XML" Margin="0,0,6,4" Command="{Binding RunBenchmarkAndXmlCommand}" />
+            <Button Content="Скасувати" Margin="0,0,0,4" Command="{Binding CancelOperationCommand}" />
+        </WrapPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,330">
+            <DataGrid Grid.Column="0"
+                      ItemsSource="{Binding FilteredEnrollments}"
+                      SelectedItem="{Binding SelectedEnrollment}"
+                      IsReadOnly="True"
+                      AutoGenerateColumns="False"
+                      GridLinesVisibility="All"
+                      Margin="0,0,12,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Здобувач" Binding="{Binding Student.FullName}" Width="*" MinWidth="175" />
+                    <DataGridTextColumn Header="Група" Binding="{Binding Student.Group}" Width="76" />
+                    <DataGridTextColumn Header="Код" Binding="{Binding Course.Code}" Width="92" />
+                    <DataGridTextColumn Header="Курс" Binding="{Binding Course.Title}" Width="*" MinWidth="80" />
+                    <DataGridTextColumn Header="Наступна робота" Binding="{Binding NextActivityText}" Width="140" />
+                    <DataGridTextColumn Header="Дедлайн" Binding="{Binding NextDeadlineText}" Width="165" />
+                    <DataGridTextColumn Header="Рейтинг" Binding="{Binding TotalRating}" Width="84" />
+                    <DataGridTextColumn Header="Оцінка" Binding="{Binding NationalGrade}" Width="114" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <ScrollViewer Grid.Column="1">
+                <StackPanel Spacing="8" Margin="0,0,14,0">
+                    <TextBlock Text="Керування курсами" FontWeight="Bold" />
+                    <ComboBox ItemsSource="{Binding Courses}" SelectedItem="{Binding SelectedCourse}"
+                              PlaceholderText="Оберіть курс або введіть код нижче" HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="m:Course">
+                                <TextBlock Text="{Binding DisplayName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox PlaceholderText="Код (напр. CS-101)" Text="{Binding NewCourseCode}" />
+                    <TextBox PlaceholderText="Назва курсу" Text="{Binding NewCourseTitle}" />
+                    <TextBox PlaceholderText="Викладач" Text="{Binding NewCourseInstructor}" />
+                    <UniformGrid Columns="3">
+                        <Button Content="Додати" Command="{Binding AddCourseCommand}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                        <Button Content="Оновити" Command="{Binding UpdateCourseCommand}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                        <Button Content="Видалити" Command="{Binding DeleteCourseCommand}" HorizontalAlignment="Stretch" />
+                    </UniformGrid>
+
+                    <!-- ШІ: Claude Code (Claude Opus 5.5) – блок CRUD робіт курсу (тип, назва, максимум, дедлайн, параметр типу).
+                         Змінено: [ЗАПОВНИТИ – що змінив або перевірив студент] -->
+                    <Separator />
+                    <TextBlock Text="Роботи курсу" FontWeight="Bold" />
+                    <TextBlock Text="{Binding ActivitiesInfo}" TextWrapping="Wrap" Foreground="#5A6270" />
+                    <ComboBox ItemsSource="{Binding CourseActivities}" SelectedItem="{Binding EditedActivity}"
+                              PlaceholderText="Оберіть роботу, щоб змінити чи видалити" HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="m:CourseActivity">
+                                <TextBlock Text="{Binding DisplayName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Grid ColumnDefinitions="Auto,*">
+                        <TextBlock Grid.Column="0" Text="Тип" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding ActivityTypes}" SelectedItem="{Binding ActivityType}"
+                                  HorizontalAlignment="Stretch" />
+                    </Grid>
+                    <TextBox PlaceholderText="Назва роботи (напр. Лабораторна 5)" Text="{Binding ActivityTitle}" />
+                    <Grid ColumnDefinitions="*,*">
+                        <TextBox Grid.Column="0" PlaceholderText="Макс. бал" Text="{Binding ActivityMaxText}"
+                                 ToolTip.Tip="Максимальний бал за роботу (більше 0, не більше 100)" Margin="0,0,6,0" />
+                        <CalendarDatePicker Grid.Column="1" SelectedDate="{Binding ActivityDeadline}"
+                                            PlaceholderText="Дедлайн" HorizontalAlignment="Stretch" />
+                    </Grid>
+                    <TextBlock Text="{Binding ActivityExtraLabel}" Foreground="#5A6270" />
+                    <TextBox Text="{Binding ActivityExtraText}" />
+                    <UniformGrid Columns="3">
+                        <Button Content="Додати" Command="{Binding AddActivityCommand}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                        <Button Content="Оновити" Command="{Binding UpdateActivityCommand}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                        <Button Content="Видалити" Command="{Binding DeleteActivityCommand}" HorizontalAlignment="Stretch" />
+                    </UniformGrid>
+
+                    <Separator />
+                    <TextBlock Text="Керування здобувачами" FontWeight="Bold" />
+                    <ComboBox ItemsSource="{Binding Students}" SelectedItem="{Binding SelectedStudent}"
+                              PlaceholderText="Оберіть здобувача або введіть ПІБ нижче" HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="m:Student">
+                                <TextBlock Text="{Binding DisplayName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox PlaceholderText="ПІБ здобувача" Text="{Binding NewStudentName}" />
+                    <TextBox PlaceholderText="Група (напр. 3РП-11)" Text="{Binding NewStudentGroup}" />
+                    <UniformGrid Columns="3">
+                        <Button Content="Додати" Command="{Binding AddStudentCommand}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                        <Button Content="Оновити" Command="{Binding UpdateStudentCommand}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                        <Button Content="Видалити" Command="{Binding DeleteStudentCommand}" HorizontalAlignment="Stretch" />
+                    </UniformGrid>
+
+                    <Separator />
+                    <TextBlock Text="Запис на курс і оцінки" FontWeight="Bold" />
+                    <UniformGrid Columns="2">
+                        <Button Content="Записати" Command="{Binding EnrollSelectedCommand}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                        <Button Content="Видалити запис" Command="{Binding DeleteSelectedEnrollmentCommand}" HorizontalAlignment="Stretch" />
+                    </UniformGrid>
+                    <TextBlock Text="{Binding GradeHint}" TextWrapping="Wrap" Foreground="#5A6270" />
+                    <ComboBox ItemsSource="{Binding SelectedEnrollmentActivities}" SelectedItem="{Binding SelectedActivity}"
+                              PlaceholderText="Спершу оберіть рядок у таблиці" HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="m:CourseActivity">
+                                <TextBlock Text="{Binding DisplayName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" PlaceholderText="Бал" Text="{Binding GradeRawScoreText}" Margin="0,0,8,0" />
+                        <CheckBox Grid.Column="1" Content="Запізн." IsChecked="{Binding GradeIsLate}" />
+                    </Grid>
+                    <Button Content="Виставити оцінку" Command="{Binding AddGradeToSelectedCommand}" HorizontalAlignment="Stretch" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,220" Margin="0,10,0,0">
+            <TextBlock Grid.Column="0" Text="{Binding StatusText}" TextWrapping="Wrap" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Text="{Binding ShownInfo}" Foreground="#5A6270" Margin="12,0" VerticalAlignment="Center" />
+            <ProgressBar Grid.Column="2" Minimum="0" Maximum="100" Value="{Binding ProgressValue}" Height="18" />
+        </Grid>
+    </Grid>
+</Window>
